@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apna Anaaj - Agricultural Commodity Price Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .main-container {
+            padding: 20px 50px 75px 50px;
+        }
+
+        .header-logo {
+            background: linear-gradient(135deg, #ffd54f 0%, #ffb300 100%);
+            border-radius: 15px;
+            padding: 20px 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header > div:first-child {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 2.2rem;
+            line-height: 1.2;
+        }
+
+        .header-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        #farmerName {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+        }
+
+        .commodity-card {
+            cursor: pointer;
+            height: 100%;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        }
+
+        .commodity-card:hover {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .commodity-icon {
+            width: 48px;
+            height: 48px;
+        }
+
+        .trend-positive {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .trend-negative {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .ticker-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(102, 126, 234, 0.6); }
+        }
+
+        .ticker-card h6 {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        .ticker-card .card-title {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin: 30px 0 20px 0;
+            display: inline-block;
+        }
+
+        table.striped tbody tr:nth-child(odd) {
+            background-color: rgba(242, 242, 242, 0.5);
+        }
+
+        .price-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .trend-icon {
+            width: 25px;
+            height: 25px;
+            vertical-align: middle;
+        }
+
+        .ticker-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .ticker-change {
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 15px 20px 50px 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-logo">
+            <div class="header">
+                <div>
+                    <h1>🌾 Farmer Dashboard</h1>
+                    <span id="farmerName"></span>
+                </div>
+                <div class="header-buttons">
+                  <div>  <a href="dashboard.html" style="text-align: center; " class="btn btn-transactions">Dashboard</a></div>
+            
+                
+                    
+                    <button class="btn btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="row">
+            <!-- Top Gainers & Losers -->
+            <div class="col s12 l9">
+                <div class="card">
+                    <div class="card-content">
+                        <h4 class="section-title">Top Gainers (Current Trends)</h4>
+                        <div id="top-gainers-loading" class="loading">
+                            <div class="preloader-wrapper active">
+                                <div class="spinner-layer spinner-green-only">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="striped" id="top-gainers-table" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Price (per Qtl.)</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top-gainers-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h4 class="section-title">Top Losers (Current Trends)</h4>
+                        <div id="top-losers-loading" class="loading">
+                            <div class="preloader-wrapper active">
+                                <div class="spinner-layer spinner-red-only">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="striped" id="top-losers-table" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Price (per Qtl.)</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top-losers-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Ticker -->
+            <div class="col s12 l3">
+                <div class="card ticker-card">
+                    <div class="card-content">
+                        <h6>Star Commodity Prediction</h6>
+                        <span class="card-title" id="ticker-time">Loading...</span>
+                        <table>
+                            <tr>
+                                <td>
+                                    <h5 id="ticker-crop1">--</h5>
+                                </td>
+                                <td class="right">
+                                    <h4 class="ticker-value" id="ticker-price1">₹--</h4>
+                                    <p class="ticker-change" id="ticker-change1">--%</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h5 id="ticker-crop2">--</h5>
+                                </td>
+                                <td class="right">
+                                    <h4 class="ticker-value" id="ticker-price2">₹--</h4>
+                                    <p class="ticker-change" id="ticker-change2">--%</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commodities Grid -->
+        <h4 class="section-title">Explore by Commodity</h4>
+        <div class="row" id="commodities-grid">
+            <!-- Commodities will be loaded here -->
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+
+        // Commodity icons mapping
+        const commodityIcons = {
+            'Paddy': 'https://img.icons8.com/color/48/000000/rice-bowl.png',
+            'Wheat': 'https://img.icons8.com/color/48/000000/wheat.png',
+            'Barley': 'https://img.icons8.com/color/48/000000/barley.png',
+            'Soyabean': 'https://img.icons8.com/color/48/000000/soy.png',
+            'Cotton': 'https://img.icons8.com/color/48/000000/cotton.png',
+            'Copra': 'https://img.icons8.com/color/48/000000/coconut.png',
+            'Groundnut': 'https://img.icons8.com/color/48/000000/peanuts.png',
+            'Rape': 'https://img.icons8.com/color/48/000000/seeds.png',
+            'Sesamum': 'https://img.icons8.com/color/48/000000/sesame.png',
+            'Gram': 'https://img.icons8.com/color/48/000000/paper-bag-with-seeds.png',
+            'Sugarcane': 'https://img.icons8.com/color/48/000000/bamboo.png',
+            'Maize': 'https://img.icons8.com/color/48/000000/corn.png'
+        };
+
+        // Predefined commodities
+        const commodities = [
+            'Paddy', 'Wheat', 'Barley', 'Soyabean', 'Cotton', 'Copra',
+            'Groundnut', 'Rape', 'Sesamum', 'Gram', 'Sugarcane', 'Arhar',
+            'Ragi', 'Maize', 'Moong', 'Masoor', 'Urad', 'Jute',
+            'Niger', 'Safflower', 'Sunflower', 'Jowar', 'Bajra'
+        ];
+
+        // Load Dashboard Data
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/dashboard`);
+                const data = await response.json();
+
+                // Load Top Gainers
+                const gainersBody = document.getElementById('top-gainers-body');
+                gainersBody.innerHTML = data.top5.map(item => `
+                    <tr>
+                        <td><strong>${item[0]}</strong></td>
+                        <td><span class="price-badge">₹${item[1]}</span></td>
+                        <td class="trend-positive">
+                            ${item[2]}% 
+                            <img src="https://img.icons8.com/color/25/000000/up--v1.png" class="trend-icon">
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('top-gainers-loading').style.display = 'none';
+                document.getElementById('top-gainers-table').style.display = 'table';
+
+                // Load Top Losers
+                const losersBody = document.getElementById('top-losers-body');
+                losersBody.innerHTML = data.bottom5.map(item => `
+                    <tr>
+                        <td><strong>${item[0]}</strong></td>
+                        <td><span class="price-badge">₹${item[1]}</span></td>
+                        <td class="trend-negative">
+                            ${item[2]}% 
+                            <img src="https://img.icons8.com/color/25/000000/down--v1.png" class="trend-icon">
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('top-losers-loading').style.display = 'none';
+                document.getElementById('top-losers-table').style.display = 'table';
+
+                // Start ticker updates
+                startTickerUpdates(data.sixmonths);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                M.toast({html: 'Error loading dashboard data', classes: 'red'});
+            }
+        }
+
+        // Ticker Updates
+        let tickerIndex = 0;
+        let tickerData = [];
+
+        function startTickerUpdates(sixMonthsData) {
+            tickerData = sixMonthsData;
+            updateTicker();
+            setInterval(updateTicker, 4000);
+        }
+
+        function updateTicker() {
+            if (tickerData.length === 0) return;
+
+            const current = tickerData[tickerIndex];
+            document.getElementById('ticker-time').textContent = current[0];
+            document.getElementById('ticker-crop1').textContent = current[1];
+            document.getElementById('ticker-price1').textContent = `₹${current[2]}`;
+            document.getElementById('ticker-change1').textContent = `${current[3]}%`;
+            document.getElementById('ticker-crop2').textContent = current[4];
+            document.getElementById('ticker-price2').textContent = `₹${current[5]}`;
+            document.getElementById('ticker-change2').textContent = `${current[6]}%`;
+
+            tickerIndex = (tickerIndex + 1) % tickerData.length;
+        }
+
+        // Load Commodities Grid
+        function loadCommoditiesGrid() {
+            const grid = document.getElementById('commodities-grid');
+            grid.innerHTML = commodities.map(commodity => {
+                const icon = commodityIcons[commodity] || 'https://img.icons8.com/color/48/000000/potato.png';
+                return `
+                    <div class="col s12 m6 l3">
+                        <div class="card commodity-card" onclick="viewCommodity('${commodity.toLowerCase()}')">
+                            <div class="card-content valign-wrapper" style="display: flex; align-items: center; gap: 15px;">
+                                <img src="${icon}" class="commodity-icon">
+                                <span class="card-title" style="margin: 0; font-size: 1.2rem;">${commodity}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // View Commodity Details
+        function viewCommodity(name) {
+            window.location.href = `commodity.html?name=${name}`;
+        }
+
+        // Logout function
+        function logout() {
+            // Add your logout logic here
+            window.location.href = 'login.html';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            loadCommoditiesGrid();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Provider Dashboard</title>
+    <style>
+        /* ---- Your full CSS from above kept exactly the same ---- */
+        /* (I did not modify your styling, only fixed the structure) */
+        
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',sans-serif;background:#f5f7fa}
+        .header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px 40px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+        .header-content{display:flex;justify-content:space-between;align-items:center;max-width:1400px;margin:0 auto}
+        .container{max-width:1400px;margin:30px auto;padding:0 40px}
+        .nav-tabs{display:flex;gap:10px;margin-bottom:30px;background:white;padding:10px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+        .nav-tab{padding:12px 24px;background:transparent;border:none;border-radius:8px;cursor:pointer;font-weight:600;color:#666;transition:.3s}
+        .nav-tab.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white}
+        .tab-content{display:none}
+        .tab-content.active{display:block;animation:fadeIn .3s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .card{background:white;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:20px}
+        .btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:.3s}
+        .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:white}
+        .btn-sm{padding:6px 12px;font-size:13px}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center}
+        .modal.show{display:flex}
+        .modal-content{background:white;padding:30px;border-radius:12px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto}
+        .empty-state{text-align:center;padding:40px;color:#999}
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <h1>🚜 Service Provider Dashboard</h1>
+            <div class="user-info">
+                <span id="user-name"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchMainTab('services')">My Services</button>
+            <button class="nav-tab" onclick="switchMainTab('transactions')">Transactions</button>
+            <button class="nav-tab" onclick="switchMainTab('profile')">Profile</button>
+        </div>
+
+        <!-- SERVICES TAB -->
+        <div id="services-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>My Services</h2>
+                    <button class="btn btn-primary" onclick="openServiceModal()">+ Add Service</button>
+                </div>
+                <div id="services-table"></div>
+            </div>
+        </div>
+
+        <!-- TRANSACTIONS TAB -->
+        <div id="transactions-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Transaction History</h2>
+                    <button class="btn btn-primary" onclick="openTransactionModal()">+ Add Transaction</button>
+                </div>
+                <div id="transactions-table"></div>
+            </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="profile-tab" class="tab-content">
+            <div class="card">
+                <h2>My Profile</h2>
+                <form onsubmit="updateProfile(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profile-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="profile-username" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="profile-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profile-email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="profile-location" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="profile-password" required>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SERVICE MODAL -->
+    <div id="service-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="service-modal-title">Add Service</h3>
+            <button class="close-btn" onclick="closeServiceModal()">&times;</button>
+
+            <form onsubmit="saveService(event)">
+                <input type="hidden" id="service-id">
+
+                <div class="form-group">
+                    <label>Service Name</label>
+                    <input type="text" id="service-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="service-type" required>
+                        <option value="">Select</option>
+                        <option>Tractor Service</option>
+                        <option>JCB Service</option>
+                        <option>Labour Supply</option>
+                        <option>Harvester</option>
+                        <option>Tiller</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Price/hour</label>
+                    <input type="number" id="service-price" required>
+                </div>
+
+                <button class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TRANSACTION MODAL -->
+    <div id="transaction-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="transaction-modal-title">Add Transaction</h3>
+            <button class="close-btn" onclick="closeTransactionModal()">&times;</button>
+
+            <form onsubmit="saveTransaction(event)">
+                <input type="hidden" id="transaction-id">
+
+                <div class="form-group">
+                    <label>Customer ID</label>
+                    <input type="number" id="transaction-customer-id" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Service Type</label>
+                    <input type="text" id="transaction-service-type" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="transaction-amount" required>
+                </div>
+
+                <button class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS LOGIC -->
+    <script>
+        const API_URL = "http://localhost:8000";
+        let currentUserId = localStorage.getItem("userId");
+
+        if (!currentUserId) window.location.href = "login.html";
+
+        document.getElementById("user-name").textContent = localStorage.getItem("userName");
+
+        function switchMainTab(tab) {
+            document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+            document.querySelector(`.nav-tab:nth-child(${["services","transactions","profile"].indexOf(tab)+1})`).classList.add("active");
+            document.getElementById(`${tab}-tab`).classList.add("active");
+
+            if (tab === "services") loadServices();
+            if (tab === "transactions") loadTransactions();
+            if (tab === "profile") loadProfile();
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+
+        /* ---------------------- Load Services ---------------------- */
+        async function loadServices() {
+            try {
+                const res = await fetch(`${API_URL}/api/services/provider/${currentUserId}`);
+                const data = await res.json();
+
+                if (!data.length) {
+                    document.getElementById("services-table").innerHTML = `<div class="empty-state">No services added yet.</div>`;
+                    return;
+                }
+
+                document.getElementById("services-table").innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(s => `
+                                <tr>
+                                    <td>${s.service_name}</td>
+                                    <td>${s.service_type}</td>
+                                    <td>${s.price_per_hour}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editService(${s.id})">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteService(${s.id})">Delete</button>
+                                    </td>
+                                </tr>`).join("")}
+                        </tbody>
+                    </table>`;
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        /* ---------------------- Save Service ---------------------- */
+        async function saveService(e) {
+            e.preventDefault();
+
+            const payload = {
+                service_provider_id: Number(currentUserId),
+                service_name: document.getElementById("service-name").value,
+                service_type: document.getElementById("service-type").value,
+                price_per_hour: Number(document.getElementById("service-price").value)
+            };
+
+            await fetch(`${API_URL}/api/services`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            closeServiceModal();
+            loadServices();
+        }
+
+        function openServiceModal() {
+            document.getElementById("service-modal").classList.add("show");
+        }
+
+        function closeServiceModal() {
+            document.getElementById("service-modal").classList.remove("show");
+        }
+
+        /* ---------------------- Transactions ---------------------- */
+        async function loadTransactions() {
+            try {
+                const res = await fetch(`${API_URL}/api/transactions/provider/${currentUserId}`);
+                const data = await res.json();
+
+                if (!data.length) {
+                    document.getElementById("transactions-table").innerHTML = `<div class="empty-state">No transactions found</div>`;
+                    return;
+                }
+
+                document.getElementById("transactions-table").innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(t => `
+                                <tr>
+                                    <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                                    <td>${t.customer_id}</td>
+                                    <td>${t.service_type}</td>
+                                    <td>${t.amount}</td>
+                                </tr>`).join("")}
+                        </tbody>
+                    </table>`;
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        function openTransactionModal() {
+            document.getElementById("transaction-modal").classList.add("show");
+        }
+
+        function closeTransactionModal() {
+            document.getElementById("transaction-modal").classList.remove("show");
+        }
+
+        async function saveTransaction(e) {
+            e.preventDefault();
+
+            const payload = {
+                service_provider_id: Number(currentUserId),
+                customer_id: Number(document.getElementById("transaction-customer-id").value),
+                service_type: document.getElementById("transaction-service-type").value,
+                amount: Number(document.getElementById("transaction-amount").value)
+            };
+
+            await fetch(`${API_URL}/api/transactions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            closeTransactionModal();
+            loadTransactions();
+        }
+
+        /* ---------------------- Profile ---------------------- */
+        async function loadProfile() {
+            const res = await fetch(`${API_URL}/api/service-provider/${currentUserId}`);
+            const u = await res.json();
+
+            document.getElementById("profile-name").value = u.name;
+            document.getElementById("profile-username").value = u.username;
+            document.getElementById("profile-phone").value = u.phone;
+            document.getElementById("profile-email").value = u.email;
+            document.getElementById("profile-location").value = u.location;
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+
+            const payload = {
+                name: document.getElementById("profile-name").value,
+                username: document.getElementById("profile-username").value,
+                phone: document.getElementById("profile-phone").value,
+                email: document.getElementById("profile-email").value,
+                location: document.getElementById("profile-location").value,
+                password: document.getElementById("profile-password").value
+            };
+
+            await fetch(`${API_URL}/api/service-provider/${currentUserId}`, {
+                method: "PUT",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify(payload)
+            });
+
+            alert("Profile updated!");
+        }
+
+    </script>
+</body>
+</html>

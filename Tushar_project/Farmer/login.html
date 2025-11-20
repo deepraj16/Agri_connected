@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Login - AgriConnect</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-container {
+            max-width: 450px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .auth-container h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        .toggle-auth a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .alert.success { background: #d4edda; color: #155724; }
+        .alert.error { background: #f8d7da; color: #721c24; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div id="loginForm">
+            <h2>🌾 Farmer Login</h2>
+            <div class="alert" id="loginAlert"></div>
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <div class="toggle-auth">
+                Don't have an account? <a href="#" onclick="toggleAuth()">Create Account</a>
+            </div>
+        </div>
+
+        <div id="registerForm" class="hidden">
+            <h2>🌾 Create Farmer Account</h2>
+            <div class="alert" id="registerAlert"></div>
+            <form onsubmit="register(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="regPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="regAddress" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+            <div class="toggle-auth">
+                Already have an account? <a href="#" onclick="toggleAuth()">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+
+        function toggleAuth() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('registerForm').classList.toggle('hidden');
+        }
+
+        async function login(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/farmer/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('farmer_id', data.farmer_id);
+                    localStorage.setItem('farmer_name', data.name);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showAlert('loginAlert', data.detail || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showAlert('loginAlert', 'Connection error', 'error');
+            }
+        }
+
+        async function register(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('regName').value,
+                username: document.getElementById('regUsername').value,
+                phone: document.getElementById('regPhone').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                address: document.getElementById('regAddress').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/farmer/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('registerAlert', 'Account created! Please login.', 'success');
+                    setTimeout(() => toggleAuth(), 2000);
+                } else {
+                    showAlert('registerAlert', result.detail || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showAlert('registerAlert', 'Connection error', 'error');
+            }
+        }
+
+        function showAlert(id, message, type) {
+            const alert = document.getElementById(id);
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 3000);
+        }
+    </script>
+</body>
+</html> 

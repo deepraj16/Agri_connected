@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>🌾 Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard"><span class="icon">📊</span> Dashboard</a></li>
+                <li class="active"><a href="/orders"><span class="icon">📦</span> Orders</a></li>
+                <li><a href="/logout"><span class="icon">🚪</span> Logout</a></li>
+            </ul>
+        </nav>
+
+        <div class="main-content">
+            <header class="topbar">
+                <h1>Orders Management</h1>
+                <div class="user-info"><span>Admin</span></div>
+            </header>
+
+            <div class="content-area">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="filters-row">
+                            <div class="filter-group">
+                                <input type="text" id="searchInput" placeholder="Search orders..." class="form-control">
+                            </div>
+                            <div class="filter-group">
+                                <select id="statusFilter" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <button onclick="loadOrders()" class="btn btn-primary">Apply Filters</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>All Orders</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="ordersTable"><p class="loading">Loading orders...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        async function loadOrders() {
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (status) params.append('status', status);
+            
+            try {
+                const response = await fetch(`/api/admin/orders?${params.toString()}`);
+                const orders = await response.json();
+                displayOrders(orders);
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Failed to load orders');
+            }
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersTable');
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="text-muted">No orders found</p>';
+                return;
+            }
+            
+            const table = `
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product</th>
+                                <th>Customer</th>
+                                <th>Farmer</th>
+                                <th>Quantity</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => `
+                                <tr>
+                                    <td>#${order.id}</td>
+                                    <td>${order.product_name}</td>
+                                    <td>${order.customer_name}</td>
+                                    <td>${order.farmer_name}</td>
+                                    <td>${order.quantity}</td>
+                                    <td>₹${order.total_amount.toFixed(2)}</td>
+                                    <td><span class="badge badge-${getPaymentColor(order.payment_status)}">${order.payment_status}</span></td>
+                                    <td><span class="badge badge-${getStatusColor(order.order_status)}">${order.order_status}</span></td>
+                                    <td><a href="/orders/${order.id}" class="btn btn-sm btn-primary">View</a></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.innerHTML = table;
+        }
+
+        loadOrders();
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadOrders();
+        });
+    </script>
+</body>
+</html>

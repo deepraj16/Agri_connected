@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - AgriConnect</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 { color: #667eea; font-size: 28px; }
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .orders-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tr:hover { background: #f9f9f9; }
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.paid { background: #4CAF50; color: white; }
+        .status.pending { background: #FFC107; color: white; }
+        .status.delivered { background: #2196F3; color: white; }
+        .status.processing { background: #FF9800; color: white; }
+        .no-orders {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 My Orders</h1>
+            <a href="dashboard.html" class="btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="orders-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let farmerId = localStorage.getItem('farmer_id');
+
+        if (!farmerId) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_BASE}/farmer/${farmerId}/orders`);
+                const data = await response.json();
+                const tbody = document.getElementById('ordersTableBody');
+
+                if (data.orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="no-orders">No orders yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.orders.map(o => `
+                    <tr>
+                        <td>#${o.order_id}</td>
+                        <td>${o.customer_name}</td>
+                        <td>${o.customer_phone}</td>
+                        <td>${o.items}</td>
+                        <td>₹${o.total_amount}</td>
+                        <td><span class="status ${o.payment_status}">${o.payment_status}</span></td>
+                        <td><span class="status ${o.order_status}">${o.order_status}</span></td>
+                        <td>${new Date(o.created_at).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - AgriConnect</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 { color: #667eea; font-size: 28px; }
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .summary-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .summary-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .summary-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .summary-item h3 { font-size: 14px; margin-bottom: 10px; opacity: 0.9; }
+        .summary-item .value { font-size: 32px; font-weight: 700; }
+        .top-products {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .top-products h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .product-item .name { font-weight: 600; color: #333; }
+        .product-item .stats { 
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .product-item .revenue {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .daily-sales {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .daily-sales h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tr:hover { background: #f9f9f9; }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .ai-analysis {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .ai-analysis h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ai-content {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: #333;
+            font-size: 15px;
+        }
+        .loading-ai {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .loading-ai::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .generate-ai-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        .generate-ai-btn:hover {
+            transform: translateY(-2px);
+        }
+        .generate-ai-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Sales Report</h1>
+            <a href="dashboard.html" class="btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="summary-section">
+            <h2>Overall Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <h3>Total Transactions</h3>
+                    <div class="value" id="totalTransactions">0</div>
+                </div>
+                <div class="summary-item">
+                    <h3>Items Sold</h3>
+                    <div class="value" id="totalItems">0</div>
+                </div>
+                <div class="summary-item">
+                    <h3>Total Revenue</h3>
+                    <div class="value" id="totalRevenue">₹0</div>
+                </div>
+                <div class="summary-item">
+                    <h3>Avg Order Value</h3>
+                    <div class="value" id="avgOrder">₹0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-analysis">
+            <h2>🤖 AI-Powered Business Insights</h2>
+            <button class="generate-ai-btn" id="generateAiBtn" onclick="generateAIAnalysis()">
+                Generate AI Analysis
+            </button>
+            <div id="aiAnalysisContent"></div>
+        </div>
+
+        <div class="top-products">
+            <h2>Top 5 Products by Revenue</h2>
+            <div id="topProductsList"></div>
+        </div>
+
+        <div class="daily-sales">
+            <h2>Daily Sales Breakdown</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Orders</th>
+                        <th>Quantity</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="dailySalesBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let farmerId = localStorage.getItem('farmer_id');
+
+        if (!farmerId) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadReport() {
+            try {
+                const response = await fetch(`${API_BASE}/farmer/${farmerId}/report`);
+                const data = await response.json();
+
+                // Update summary
+                document.getElementById('totalTransactions').textContent = data.summary.total_transactions;
+                document.getElementById('totalItems').textContent = data.summary.total_items_sold;
+                document.getElementById('totalRevenue').textContent = '₹' + data.summary.total_revenue.toFixed(2);
+                document.getElementById('avgOrder').textContent = '₹' + data.summary.avg_order_value.toFixed(2);
+
+                // Top products
+                const topProductsList = document.getElementById('topProductsList');
+                if (data.top_products.length === 0) {
+                    topProductsList.innerHTML = '<div class="no-data">No product sales yet</div>';
+                } else {
+                    topProductsList.innerHTML = data.top_products.map((p, index) => `
+                        <div class="product-item">
+                            <div>
+                                <div class="name">${index + 1}. ${p.product_name}</div>
+                                <div class="stats">
+                                    <span>📦 ${p.order_count} orders</span>
+                                    <span>🔢 ${p.total_quantity} units</span>
+                                </div>
+                            </div>
+                            <div class="revenue">₹${parseFloat(p.total_revenue).toFixed(2)}</div>
+                        </div>
+                    `).join('');
+                }
+
+                // Daily sales
+                const dailySalesBody = document.getElementById('dailySalesBody');
+                if (data.daily_sales.length === 0) {
+                    dailySalesBody.innerHTML = '<tr><td colspan="5" class="no-data">No sales data available</td></tr>';
+                } else {
+                    dailySalesBody.innerHTML = data.daily_sales.map(s => `
+                        <tr>
+                            <td>${new Date(s.sale_date).toLocaleDateString()}</td>
+                            <td><strong>${s.product_name}</strong></td>
+                            <td>${s.total_orders}</td>
+                            <td>${s.total_quantity}</td>
+                            <td><strong>₹${parseFloat(s.total_revenue).toFixed(2)}</strong></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading report:', error);
+            }
+        }
+
+        async function generateAIAnalysis() {
+            const btn = document.getElementById('generateAiBtn');
+            const content = document.getElementById('aiAnalysisContent');
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.textContent = 'Generating Analysis...';
+            content.innerHTML = '<div class="loading-ai">AI is analyzing your sales data</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/farmer/${farmerId}/ai-report`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    content.innerHTML = `<div class="ai-content">${data.analysis}</div>`;
+                } else {
+                    content.innerHTML = `<div class="ai-content" style="color: #f44336;">Error: ${data.error || 'Unable to generate analysis'}</div>`;
+                }
+            } catch (error) {
+                console.error('Error generating AI analysis:', error);
+                content.innerHTML = '<div class="ai-content" style="color: #f44336;">Failed to generate AI analysis. Please try again.</div>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Regenerate Analysis';
+            }
+        }
+
+        loadReport();
+    </script>
+</body>
+</html>
