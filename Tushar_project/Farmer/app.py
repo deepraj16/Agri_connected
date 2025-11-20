@@ -28,12 +28,14 @@ app.add_middleware(
 
 def initialize_llm():
     """Initialize LLM with optimized settings"""
-    return ChatMistralAI(
-        model="open-mistral-7b",
-        mistral_api_key="lHcwga2vJ6yyjV470WdMIFn5hRgtMbcc",
-        temperature=0.2,
-        max_tokens=2000
-    )
+    return ChatOpenAI(
+    model="mistralai/ministral-8b",
+    temperature=0.7,
+    max_tokens=512,
+    base_url="https://openrouter.ai/api/v1",
+    api_key="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"
+)
+
 
 
 def get_db():
@@ -1030,4 +1032,5 @@ async def startup_event():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
