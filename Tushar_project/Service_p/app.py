@@ -122,110 +122,6 @@ def get_service_provider(provider_id: int, conn=Depends(get_db)):
         raise HTTPException(status_code=404, detail="Provider not found")
 
 
-@app.put("/api/service-provider/{provider_id}")
-def update_service_provider(provider_id: int, provider: ServiceProvider, conn=Depends(get_db)):
-    cursor = conn.cursor()
-
-    try:
-        query = """
-        UPDATE service_providers
-        SET name=%s, username=%s, phone=%s, email=%s, password=%s, location=%s
-        WHERE id=%s
-        """
-        cursor.execute(query, (
-            provider.name, provider.username, provider.phone,
-            provider.email, provider.password, provider.location, provider_id
-        ))
-        conn.commit()
-
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Provider not found")
-
-        return {"message": "Update successful"}
-
-    except pymysql.err.IntegrityError:
-        raise HTTPException(status_code=400, detail="Username, phone or email already exists")
-
-    finally:
-        cursor.close()
-
-
-@app.delete("/api/service-provider/{provider_id}")
-def delete_service_provider(provider_id: int, conn=Depends(get_db)):
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM service_providers WHERE id = %s", (provider_id,))
-    conn.commit()
-
-    if cursor.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Provider not found")
-
-    cursor.close()
-    return {"message": "Provider deleted successfully"}
-
-# -------------------- CUSTOMER ENDPOINTS --------------------
-
-@app.post("/api/customer/register")
-def register_customer(customer: Customer, conn=Depends(get_db)):
-    cursor = conn.cursor()
-
-    try:
-        query = """
-        INSERT INTO customers (name, username, phone, email, password)
-        VALUES (%s, %s, %s, %s, %s)
-        """
-        cursor.execute(query, (
-            customer.name, customer.username, customer.phone,
-            customer.email, customer.password
-        ))
-        conn.commit()
-
-        return {"message": "Customer registered", "id": cursor.lastrowid}
-
-    except pymysql.err.IntegrityError:
-        raise HTTPException(status_code=400, detail="Username, phone or email already exists")
-
-    finally:
-        cursor.close()
-
-
-@app.get("/api/customers")
-def get_all_customers(conn=Depends(get_db)):
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name, username, phone, email, created_at FROM customers")
-    customers = cursor.fetchall()
-    cursor.close()
-    return customers
-
-# -------------------- SERVICE ENDPOINTS (MISSING IN ORIGINAL) --------------------
-
-@app.post("/api/services")
-def create_service(service: Service, conn=Depends(get_db)):
-    cursor = conn.cursor()
-    
-    try:
-        query = """
-        INSERT INTO services 
-        (service_provider_id, service_name, service_type, price_per_hour, available, description)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(query, (
-            service.service_provider_id,
-            service.service_name,
-            service.service_type,
-            service.price_per_hour,
-            service.available,
-            service.description
-        ))
-        conn.commit()
-        service_id = cursor.lastrowid
-        
-        return {"message": "Service created", "id": service_id}
-    
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
-    finally:
-        cursor.close()
 
 
 @app.get("/api/services/provider/{provider_id}")
@@ -436,4 +332,5 @@ def delete_transaction(transaction_id: int, conn=Depends(get_db)):
 
 # -------------------- RUN APP --------------------
 if __name__ == "__main__":
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
