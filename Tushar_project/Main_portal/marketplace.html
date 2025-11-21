@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agri Marketplace - Products & Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.8em;
+        }
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .navbar button:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .search-bar {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-bar button {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .search-bar button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            height: 45px;
+            overflow: hidden;
+        }
+
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .quantity {
+            background: #f0f0f0;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .farmer-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .btn-order {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-order:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+        }
+
+        .close {
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            border: none;
+            background: none;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .service-type-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #667eea20;
+            color: #667eea;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🌾 Agri Marketplace</h1>
+        <div class="user-info">
+            <span id="userName">Welcome!</span>
+            <button onclick="viewMyOrders()">My Orders</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </div>
+   
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('products')">🛒 Products</button>
+            <button class="tab" onclick="switchTab('services')">🚜 Services</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search for products or services...">
+            <button onclick="performSearch()">Search</button>
+        </div>
+
+        <div id="productsSection">
+            <div class="loading" id="productsLoading">Loading products...</div>
+            <div class="grid" id="productsGrid"></div>
+            <div class="empty-state" id="productsEmpty" style="display: none;">
+                <h3>No products found</h3>
+                <p>Try adjusting your search criteria</p>
+            </div>
+        </div>
+
+        <div id="servicesSection" style="display: none;">
+            <div class="loading" id="servicesLoading">Loading services...</div>
+            <div class="grid" id="servicesGrid"></div>
+            <div class="empty-state" id="servicesEmpty" style="display: none;">
+                <h3>No services found</h3>
+                <p>Try adjusting your search criteria</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+  
+
+    
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentUser = null;
+        let currentTab = 'products';
+        let selectedProduct = null;
+        let selectedService = null;
+
+        // Check if user is logged in
+        window.onload = function() {
+            const userData = sessionStorage.getItem('userData');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = JSON.parse(userData);
+            document.getElementById('userName').textContent = `Welcome, ${currentUser.name}!`;
+            loadProducts();
+        };
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'products') {
+                document.getElementById('productsSection').style.display = 'block';
+                document.getElementById('servicesSection').style.display = 'none';
+                if (document.getElementById('productsGrid').children.length === 0) {
+                    loadProducts();
+                }
+            } else {
+                document.getElementById('productsSection').style.display = 'none';
+                document.getElementById('servicesSection').style.display = 'block';
+                if (document.getElementById('servicesGrid').children.length === 0) {
+                    loadServices();
+                }
+            }
+        }
+
+        async function loadProducts(search = '') {
+            const loading = document.getElementById('productsLoading');
+            const grid = document.getElementById('productsGrid');
+            const empty = document.getElementById('productsEmpty');
+
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            empty.style.display = 'none';
+
+            try {
+                const url = search ? 
+                    `${API_URL}/api/products?search=${encodeURIComponent(search)}` : 
+                    `${API_URL}/api/products`;
+                
+                const response = await fetch(url);
+                const products = await response.json();
+
+                loading.style.display = 'none';
+
+                if (products.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                products.forEach(product => {
+                    const card = createProductCard(product);
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+                loading.textContent = 'Error loading products. Please try again.';
+            }
+        }
+
+        async function loadServices(search = '') {
+            const loading = document.getElementById('servicesLoading');
+            const grid = document.getElementById('servicesGrid');
+            const empty = document.getElementById('servicesEmpty');
+
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            empty.style.display = 'none';
+
+            try {
+                const url = search ? 
+                    `${API_URL}/api/services?search=${encodeURIComponent(search)}` : 
+                    `${API_URL}/api/services`;
+                
+                const response = await fetch(url);
+                const services = await response.json();
+
+                loading.style.display = 'none';
+
+                if (services.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                services.forEach(service => {
+                    const card = createServiceCard(service);
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading services:', error);
+                loading.textContent = 'Error loading services. Please try again.';
+            }
+        }
+
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.cursor = 'pointer';
+            card.onclick = () => viewProductDetail(product.id);
+            card.innerHTML = `
+                <div > <img class="card-image"src="${product.image_url}" alt=""></div> #🌾
+                <div class="card-content">
+                    <div class="card-title">${product.name}</div>
+                    <div class="card-description">${product.description || 'Fresh agricultural product'}</div>
+                    <div class="card-info">
+                        <div class="price">₹${product.price}</div>
+                        <div class="quantity">${product.quantity} available</div>
+                    </div>
+                    <div class="farmer-info">
+                        👨‍🌾 ${product.farmer_name}<br>
+                        📞 ${product.farmer_phone}
+                    </div>
+                    <button class="btn-order" onclick="viewProductDetail()">Order Now</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function createServiceCard(service) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.cursor = 'pointer';
+            card.onclick = () => viewServiceDetail(service.id);
+            card.innerHTML = `
+                <div class="card-image">🚜</div>
+                <div class="card-content">
+                    <div class="service-type-badge">${service.service_type}</div>
+                    <div class="card-title">${service.service_name}</div>
+                    <div class="card-description">${service.description || 'Professional agricultural service'}</div>
+                    <div class="card-info">
+                        <div class="price">₹${service.price_per_hour}/hr</div>
+                    </div>
+                    <div class="farmer-info">
+                        👤 ${service.provider_name}<br>
+                        📞 ${service.provider_phone}
+                    </div>
+                    <button class="btn-order" onclick="viewServiceDetail()">Book Service</button>
+                </div>
+            `;
+            return card;
+        }
+
+        async function openOrderModal(productId) {
+            const response = await fetch(`${API_URL}/api/products/${productId}`);
+            selectedProduct = await response.json();
+
+            document.getElementById('orderDetails').innerHTML = `
+                <h3>${selectedProduct.name}</h3>
+                <p>Price per unit: ₹${selectedProduct.price}</p>
+                <p>Available: ${selectedProduct.quantity} units</p>
+            `;
+
+            document.getElementById('orderQuantity').max = selectedProduct.quantity;
+            document.getElementById('orderQuantity').value = 1;
+            document.getElementById('orderTotal').value = `₹${selectedProduct.price}`;
+
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.remove('active');
+            selectedProduct = null;
+        }
+
+        document.getElementById('orderQuantity').addEventListener('input', function() {
+            if (selectedProduct) {
+                const quantity = parseInt(this.value) || 0;
+                const total = quantity * selectedProduct.price;
+                document.getElementById('orderTotal').value = `₹${total.toFixed(2)}`;
+            }
+        });
+
+        async function submitOrder(event) {
+            event.preventDefault();
+
+            const quantity = parseInt(document.getElementById('orderQuantity').value);
+            const totalPrice = quantity * selectedProduct.price;
+
+            try {
+                const response = await fetch(`${API_URL}/api/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customer_id: currentUser.customer_id,
+                        product_id: selectedProduct.id,
+                        quantity: quantity,
+                        total_price: totalPrice
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showAlert('orderAlert', 'Order placed successfully!', 'success');
+                    setTimeout(() => {
+                        closeOrderModal();
+                        loadProducts();
+                    }, 2000);
+                } else {
+                    showAlert('orderAlert', data.detail || 'Failed to place order', 'error');
+                }
+            } catch (error) {
+                showAlert('orderAlert', 'Connection error. Please try again.', 'error');
+            }
+        }
+
+        async function openBookingModal(serviceId) {
+            const response = await fetch(`${API_URL}/api/services/${serviceId}`);
+            selectedService = await response.json();
+
+            document.getElementById('bookingDetails').innerHTML = `
+                <h3>${selectedService.service_name}</h3>
+                <p>Price per hour: ₹${selectedService.price_per_hour}</p>
+                <p>Type: ${selectedService.service_type}</p>
+            `;
+
+            document.getElementById('bookingHours').value = 1;
+            document.getElementById('bookingTotal').value = `₹${selectedService.price_per_hour}`;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingDate').min = today;
+            document.getElementById('bookingDate').value = today;
+
+            document.getElementById('bookingModal').classList.add('active');
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.remove('active');
+            selectedService = null;
+        }
+
+        document.getElementById('bookingHours').addEventListener('input', function() {
+            if (selectedService) {
+                const hours = parseInt(this.value) || 0;
+                const total = hours * selectedService.price_per_hour;
+                document.getElementById('bookingTotal').value = `₹${total.toFixed(2)}`;
+            }
+        });
+
+        async function submitBooking(event) {
+            event.preventDefault();
+
+            const hours = parseInt(document.getElementById('bookingHours').value);
+            const totalPrice = hours * selectedService.price_per_hour;
+            const bookingDate = document.getElementById('bookingDate').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/service-bookings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customer_id: currentUser.customer_id,
+                        service_id: selectedService.id,
+                        hours: hours,
+                        total_price: totalPrice,
+                        booking_date: bookingDate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showAlert('bookingAlert', 'Service booked successfully!', 'success');
+                    setTimeout(() => {
+                        closeBookingModal();
+                    }, 2000);
+                } else {
+                    showAlert('bookingAlert', data.detail || 'Failed to book service', 'error');
+                }
+            } catch (error) {
+                showAlert('bookingAlert', 'Connection error. Please try again.', 'error');
+            }
+        }
+
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value;
+            if (currentTab === 'products') {
+                loadProducts(searchTerm);
+            } else {
+                loadServices(searchTerm);
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        function showAlert(elementId, message, type) {
+            const alert = document.getElementById(elementId);
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        function viewMyOrders() {
+            window.location.href = 'orders.html';
+        }
+
+        function logout() {
+            sessionStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+    
+        // Navigation functions to detail pages
+        function viewProductDetail(productId) {
+            window.location.href = `product-detail.html?id=${productId}`;
+        }
+
+        function viewServiceDetail(serviceId) {
+            window.location.href = `service-detail.html?id=${serviceId}`;
+        }
+
+    </script>
+</body>
+</html>
